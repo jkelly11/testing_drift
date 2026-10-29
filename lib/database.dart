@@ -38,11 +38,16 @@ class AppDatabase extends _$AppDatabase {
   // These are described in the getting started guide: https://drift.simonbinder.eu/setup/
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
-  Stream<List<WorkoutWithExercises>> watchWorkoutWithExercises() {
+  Stream<List<WorkoutWithExercises>> watchWorkoutWithExercises({bool onlyShowCompleted = false}) {
     // the query defined in dart, look for workouts and left join with exercises
-    final query = select(workouts).join([
+    var query = select(workouts).join([
       leftOuterJoin(exercises, exercises.workoutId.equalsExp(workouts.id)),
-    ])..orderBy([OrderingTerm.asc(workouts.id)]);
+    ])
+    ..orderBy([OrderingTerm.asc(workouts.id)]);
+
+    if (onlyShowCompleted) {
+      query = query..where(workouts.endedAt.isNotNull());
+    }
 
     // watch() used 
     return query.watch().map((rows) {
@@ -57,7 +62,6 @@ class AppDatabase extends _$AppDatabase {
         if (exercise != null) entry.exercises.add(exercise);
       }
       return grouped.values.toList(); 
-      // todo: test that this works with workouts with more than 1 exercise...
     });
   }
 

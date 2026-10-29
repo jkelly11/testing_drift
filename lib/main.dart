@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:testing_drift/database.dart';
 
@@ -17,12 +17,12 @@ class WorkoutList extends StatefulWidget {
 }
 
 class _WorkOutListState extends State<WorkoutList> {
-  late final Stream<List<WorkoutWithExercises>> _workoutsStream;
+  late final Stream<List<WorkoutWithExercises>> _completedWorkoutsStream;
 
   @override
   void initState() {
     super.initState();
-    _workoutsStream = widget.database.watchWorkoutWithExercises();
+    _completedWorkoutsStream = widget.database.watchWorkoutWithExercises(onlyShowCompleted: true);
   }
 
   Future<void> addWorkout() async {
@@ -30,6 +30,7 @@ class _WorkOutListState extends State<WorkoutList> {
       final insertedWorkoutId = await widget.database.into(widget.database.workouts).insert(
         WorkoutsCompanion.insert(
           title: Value('New workout'), //title is nullable
+          // endedAt: Value(DateTime.now()), // set to make workout 'completed'
         ),
       );
 
@@ -48,7 +49,7 @@ class _WorkOutListState extends State<WorkoutList> {
       home: Scaffold(
         appBar: AppBar(title: const Text('Workout app')),
         body: StreamBuilder<List<WorkoutWithExercises>>(
-          stream: _workoutsStream,
+          stream: _completedWorkoutsStream,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
@@ -57,18 +58,29 @@ class _WorkOutListState extends State<WorkoutList> {
               return const Center(child: CircularProgressIndicator());
             }
             final items = snapshot.data!;
-            if (items.isEmpty) {
-              return const Center(child: Text('No workouts yet'));
-            }
-            return ListView.builder(
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final workoutWithExercises = items[index];
-                return ListTile(
-                  title: Text('${workoutWithExercises.workout.id} - ${workoutWithExercises.workout.title ?? 'Untitled workout'}'),
-                  subtitle: Text('${workoutWithExercises.exercises.length} exercise'),
-                );
-              },
+            // if (items.isEmpty) {
+            //   return const Center(child: Text('No workouts yet'));
+            // }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text('Completed Workouts', style: Theme.of(context).textTheme.headlineSmall),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final workoutWithExercises = items[index];
+                      return ListTile(
+                        title: Text('${workoutWithExercises.workout.id} - ${workoutWithExercises.workout.title ?? 'Untitled workout'}'),
+                        subtitle: Text('${workoutWithExercises.exercises.length} exercise'),
+                      );
+                    },
+                  ),
+                ),
+              ],
             );
           },
         ),
