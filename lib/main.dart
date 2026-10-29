@@ -13,6 +13,23 @@ class MainApp extends StatelessWidget {
 
   final AppDatabase database;
 
+  Future<void> addWorkout() async {
+    await database.transaction(() async { // https://drift.simonbinder.eu/dart_api/transactions/
+      final insertedWorkoutId = await database.into(database.workouts).insert(
+        WorkoutsCompanion.insert(
+          title: Value('New workout'), //title is nullable
+        ),
+      );
+
+      await database.into(database.exercises).insert(
+        ExercisesCompanion.insert(
+          name: 'New exercise',
+          workoutId: insertedWorkoutId,
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -44,13 +61,7 @@ class MainApp extends StatelessWidget {
           },
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            database.into(database.workouts).insert(
-                  WorkoutsCompanion.insert(
-                    title: Value('New workout'), //title is nullable
-                  ),
-                );
-          },
+          onPressed: addWorkout,
           child: const Icon(Icons.add),
         ),
       ),
