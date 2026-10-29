@@ -5,23 +5,35 @@ import 'package:testing_drift/database.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   final database = AppDatabase(); 
-  runApp(MainApp(database: database));
+  runApp(WorkoutList(database: database));
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key, required this.database});
-
+class WorkoutList extends StatefulWidget {
+  const WorkoutList({super.key, required this.database});
   final AppDatabase database;
 
+  @override
+  State<WorkoutList> createState() => _WorkOutListState();
+}
+
+class _WorkOutListState extends State<WorkoutList> {
+  late final Stream<List<WorkoutWithExercises>> _workoutsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _workoutsStream = widget.database.watchWorkoutWithExercises();
+  }
+
   Future<void> addWorkout() async {
-    await database.transaction(() async { // https://drift.simonbinder.eu/dart_api/transactions/
-      final insertedWorkoutId = await database.into(database.workouts).insert(
+    await widget.database.transaction(() async { // https://drift.simonbinder.eu/dart_api/transactions/
+      final insertedWorkoutId = await widget.database.into(widget.database.workouts).insert(
         WorkoutsCompanion.insert(
           title: Value('New workout'), //title is nullable
         ),
       );
 
-      await database.into(database.exercises).insert(
+      await widget.database.into(widget.database.exercises).insert(
         ExercisesCompanion.insert(
           name: 'New exercise',
           workoutId: insertedWorkoutId,
@@ -34,9 +46,9 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Workout')),
-        body: StreamBuilder<List<Workout>>(
-          stream: database.select(database.workouts).watch(),
+        appBar: AppBar(title: const Text('Workout app')),
+        body: StreamBuilder<List<WorkoutWithExercises>>(
+          stream: _workoutsStream,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
@@ -51,10 +63,10 @@ class MainApp extends StatelessWidget {
             return ListView.builder(
               itemCount: items.length,
               itemBuilder: (context, index) {
-                final workout = items[index];
+                final workoutWithExercises = items[index];
                 return ListTile(
-                  title: Text('${workout.id} - ${workout.title ?? 'Untitled workout'}'),
-                  subtitle: Text(workout.startedAt.toString()),
+                  title: Text('${workoutWithExercises.workout.id} - ${workoutWithExercises.workout.title ?? 'Untitled workout'}'),
+                  subtitle: Text('${workoutWithExercises.exercises.length} exercise'),
                 );
               },
             );

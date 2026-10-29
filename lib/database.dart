@@ -24,12 +24,42 @@ class ExerciseSets extends Table {
   IntColumn get exerciseId => integer().references(Exercises, #id)();
 }
 
+class WorkoutWithExercises {
+  final Workout workout;
+  final List<Exercise> exercises;
+
+  WorkoutWithExercises(this.workout, this.exercises);
+}
+
 @DriftDatabase(tables: [Workouts, Exercises, ExerciseSets])
 class AppDatabase extends _$AppDatabase {
   // After generating code, this class needs to define a `schemaVersion` getter
   // and a constructor telling drift where the database should be stored.
   // These are described in the getting started guide: https://drift.simonbinder.eu/setup/
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
+
+  Stream<List<WorkoutWithExercises>> watchWorkoutWithExercises() {
+    // the query defined in dart, look for workouts and left join with exercises
+    final query = select(workouts).join([
+      leftOuterJoin(exercises, exercises.workoutId.equalsExp(workouts.id)),
+    ])..orderBy([OrderingTerm.asc(workouts.id)]);
+
+    // watch() used 
+    return query.watch().map((rows) {
+      final grouped = <int, WorkoutWithExercises>{};
+      for (final row in rows) {
+        final workout = row.readTable(workouts);
+        final exercise = row.readTableOrNull(exercises);
+        final entry = grouped.putIfAbsent(
+          workout.id,
+          () => WorkoutWithExercises(workout, []),
+        );
+        if (exercise != null) entry.exercises.add(exercise);
+      }
+      return grouped.values.toList(); 
+      // todo: test that this works with workouts with more than 1 exercise...
+    });
+  }
 
   @override
   int get schemaVersion => 1;
