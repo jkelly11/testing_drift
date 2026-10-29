@@ -7,7 +7,7 @@ part 'database.g.dart';
 class Workouts extends Table {
   IntColumn get id => integer().autoIncrement()(); 
   TextColumn get title => text().nullable().withLength(max: 50)();
-  DateTimeColumn get startedAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get startedAt => dateTime().clientDefault(DateTime.now)();
   DateTimeColumn get endedAt => dateTime().nullable()();
 }
 
