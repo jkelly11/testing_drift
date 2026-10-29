@@ -4,13 +4,6 @@ import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
 
-class TodoItems extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get title => text().withLength(min: 6, max: 32)();
-  TextColumn get content => text().named('body')();
-  DateTimeColumn get createdAt => dateTime().nullable()();
-}
-
 class Workouts extends Table {
   IntColumn get id => integer().autoIncrement()(); 
   TextColumn get title => text().nullable().withLength(max: 50)();
@@ -29,7 +22,7 @@ class ExerciseSets extends Table {
   IntColumn get reps => integer().nullable()();  
 }
 
-@DriftDatabase(tables: [TodoItems, Workouts, Exercises, ExerciseSets])
+@DriftDatabase(tables: [Workouts, Exercises, ExerciseSets])
 class AppDatabase extends _$AppDatabase {
   // After generating code, this class needs to define a `schemaVersion` getter
   // and a constructor telling drift where the database should be stored.
