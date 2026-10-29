@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:testing_drift/database.dart';
 
@@ -16,9 +17,9 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Todos')),
-        body: StreamBuilder<List<TodoItem>>(
-          stream: database.select(database.todoItems).watch(),
+        appBar: AppBar(title: const Text('Workout')),
+        body: StreamBuilder<List<Workout>>(
+          stream: database.select(database.workouts).watch(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
@@ -28,15 +29,15 @@ class MainApp extends StatelessWidget {
             }
             final items = snapshot.data!;
             if (items.isEmpty) {
-              return const Center(child: Text('No todos yet'));
+              return const Center(child: Text('No workouts yet'));
             }
             return ListView.builder(
               itemCount: items.length,
               itemBuilder: (context, index) {
-                final item = items[index];
+                final workout = items[index];
                 return ListTile(
-                  title: Text(item.title),
-                  subtitle: Text(item.content),
+                  title: Text('${workout.id} - ${workout.title ?? 'Untitled workout'}'),
+                  subtitle: Text(workout.startedAt.toString()),
                 );
               },
             );
@@ -44,10 +45,10 @@ class MainApp extends StatelessWidget {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            database.into(database.todoItems).insert(
-                  TodoItemsCompanion.insert(
-                    title: 'New todo',
-                    content: 'Added at ${DateTime.now()}',
+            database.into(database.workouts).insert(
+                  WorkoutsCompanion.insert(
+                    title: Value('New workout'), //title is nullable
+                    startedAt: DateTime.now(),
                   ),
                 );
           },
