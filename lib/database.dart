@@ -14,12 +14,14 @@ class Workouts extends Table {
 class Exercises extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(max: 50)();
+  IntColumn get workoutId => integer().references(Workouts, #id)();
 }
 
 class ExerciseSets extends Table {
   IntColumn get id => integer().autoIncrement()();
   RealColumn get weight => real().nullable()();
-  IntColumn get reps => integer().nullable()();  
+  IntColumn get reps => integer().nullable()();
+  IntColumn get exerciseId => integer().references(Exercises, #id)();
 }
 
 @DriftDatabase(tables: [Workouts, Exercises, ExerciseSets])
