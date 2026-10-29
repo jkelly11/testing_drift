@@ -40,7 +40,8 @@ class $WorkoutsTable extends Workouts with TableInfo<$WorkoutsTable, Workout> {
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
   );
   static const VerificationMeta _endedAtMeta = const VerificationMeta(
     'endedAt',
@@ -81,8 +82,6 @@ class $WorkoutsTable extends Workouts with TableInfo<$WorkoutsTable, Workout> {
         _startedAtMeta,
         startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta),
       );
-    } else if (isInserting) {
-      context.missing(_startedAtMeta);
     }
     if (data.containsKey('ended_at')) {
       context.handle(
@@ -242,9 +241,9 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
   WorkoutsCompanion.insert({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
-    required DateTime startedAt,
+    this.startedAt = const Value.absent(),
     this.endedAt = const Value.absent(),
-  }) : startedAt = Value(startedAt);
+  });
   static Insertable<Workout> custom({
     Expression<int>? id,
     Expression<String>? title,
@@ -758,7 +757,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$WorkoutsTableCreateCompanionBuilder = WorkoutsCompanion Function({
   Value<int> id,
   Value<String?> title,
-  required DateTime startedAt,
+  Value<DateTime> startedAt,
   Value<DateTime?> endedAt,
 });
 typedef $$WorkoutsTableUpdateCompanionBuilder = WorkoutsCompanion Function({
@@ -892,7 +891,7 @@ class $$WorkoutsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String?> title = const Value.absent(),
-                required DateTime startedAt,
+                Value<DateTime> startedAt = const Value.absent(),
                 Value<DateTime?> endedAt = const Value.absent(),
               }) => WorkoutsCompanion.insert(
                 id: id,

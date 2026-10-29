@@ -48,7 +48,6 @@ class MainApp extends StatelessWidget {
             database.into(database.workouts).insert(
                   WorkoutsCompanion.insert(
                     title: Value('New workout'), //title is nullable
-                    startedAt: DateTime.now(),
                   ),
                 );
           },
