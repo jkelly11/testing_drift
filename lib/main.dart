@@ -1,15 +1,24 @@
 import 'package:drift/drift.dart' hide Column;
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:testing_drift/bloc/counter_bloc.dart';
+import 'package:testing_drift/counter_page.dart';
 import 'package:testing_drift/database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:testing_drift/workout.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized(); // needed?
   final database = AppDatabase();
   runApp(
     CupertinoApp(
-      title: 'Navigation basics',
-      home: CupertinoWorkoutList(database: database),
+      title: 'Bloc stuff', // https://www.youtube.com/watch?v=3bEkaRUVOeU
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (context) => CounterBloc())
+        ],
+        child: CounterPage(),
+        // child: CupertinoWorkoutList(database: database),
+      ),
     ),
   );
 }
