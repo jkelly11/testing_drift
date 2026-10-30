@@ -1,30 +1,23 @@
-import 'package:drift/drift.dart' hide Column;
-import 'package:flutter/material.dart';
-import 'package:testing_drift/database.dart';
+import 'package:flutter/cupertino.dart';
+// import 'package:testing_drift/database.dart';
 
-// void workout() {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   final database = AppDatabase();
+class WorkoutDetails extends StatelessWidget {
+  const WorkoutDetails({super.key, required this.workoutId});
 
-// }
-
-class Workout extends StatefulWidget {
-  const Workout({super.key});
-
-  @override
-  State<Workout> createState() => _WorkoutState();
-}
-
-class _WorkoutState extends State<Workout> {
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  final int workoutId;
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(middle: Text('Workout Details $workoutId')),
+      child: Center(
+        child: CupertinoButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Go back!'),
+        ),
+      ),
+    );
   }
 }

@@ -1,11 +1,11 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:testing_drift/database.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:testing_drift/workout.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   final database = AppDatabase();
-  // runApp(WorkoutList(database: database));
   runApp(
     CupertinoApp(
       title: 'Navigation basics',
@@ -55,7 +55,13 @@ class _WorkOutListState extends State<CupertinoWorkoutList> {
           );
       return insertedWorkoutId;
     });
-    // now to redirect
+    
+    if (!mounted) return;
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        builder: (_) => WorkoutDetails(workoutId: newWorkoutId,),
+      ),
+    );
   }
 
   @override
